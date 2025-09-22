@@ -238,26 +238,25 @@ services:
   # EXPANDED NOSTR INFRASTRUCTURE - COMPREHENSIVE FEATURE SET
   # ============================================================================
 
-  # NostrCheck File Server - Professional NIP-96 & Blossom implementation
+  # Blossom File Server - Professional Blossom & NIP-96 implementation
   file-server:
-    image: quentintaranpino/nostrcheck-server:latest
+    image: ghcr.io/hzrd149/blossom-server:master
     container_name: nostr-files
     ports:
-      - "127.0.0.1:7006:3000"  # NostrCheck runs on port 3000 internally
+      - "127.0.0.1:7006:3000"  # Blossom server runs on port 3000
     volumes:
-      - ./data/files:/app/uploads
-      - ./configs/files/nostrcheck.env:/app/.env:ro
+      - ./data/files:/app/data
+      - ./configs/files/blossom-config.yml:/app/config.yml:ro
     environment:
       - NODE_ENV=production
-      - PORT=3000
     restart: unless-stopped
     mem_limit: 256m
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 30s
     labels:
       - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
     networks:

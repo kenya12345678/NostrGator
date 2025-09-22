@@ -24,7 +24,7 @@ $testResults = @{
 function Test-ContainerHealth {
     Write-Host "`n📦 Testing Container Health..." -ForegroundColor Yellow
     
-    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social", "nostr-cache", "nostr-files", "nostr-longform", "nostr-live", "nostr-marketplace", "nostr-games", "nostr-bridge", "nostrgator-lnd", "nostrgator-lnbits", "nostrgator-blossom", "nostrgator-backup-manager", "nostrgator-notifications", "nostr-content-discovery", "nostr-security-monitor")
+    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social", "nostr-cache", "nostr-files", "nostr-longform", "nostr-live", "nostr-marketplace", "nostr-games", "nostr-bridge", "nostr-watchtower", "nostr-health-monitor", "nostr-content-discovery", "nostr-security-monitor", "nostr-tor-proxy", "nostr-supernode-federation", "nostr-event-mirror", "nostr-nip05")
     
     foreach ($container in $containers) {
         try {
@@ -77,9 +77,11 @@ function Test-PortConnectivity {
         "Marketplace" = 7009
         "Games" = 7010
         "Bridge" = 7011
-        "LND-gRPC" = 10009
-        "LNbits" = 5000
-        "Blossom" = 3000
+        "HealthMonitor" = 3001
+        "NIP05" = 3005
+        "SupernodeFederation" = 3002
+        "EventMirror" = 9091
+        "TorProxy" = 9050
         "ContentDiscovery" = 7080
         "SecurityMonitor" = 7081
     }
@@ -114,6 +116,14 @@ function Test-RelayResponses {
         "Media" = "http://localhost:7003"
         "Social" = "http://localhost:7004"
         "Cache" = "http://localhost:7005"
+        "Files" = "http://localhost:7006"
+        "LongForm" = "http://localhost:7007"
+        "Live" = "http://localhost:7008"
+        "Marketplace" = "http://localhost:7009"
+        "Games" = "http://localhost:7010"
+        "Bridge" = "http://localhost:7011"
+        "HealthMonitor" = "http://localhost:3001"
+        "NIP05WellKnown" = "http://localhost:3005/.well-known/nostr.json"
         "ContentDiscoveryHealth" = "http://localhost:7080/health"
         "SecurityMonitorHealth" = "http://localhost:7081/health"
     }
@@ -242,7 +252,7 @@ function Show-DetailedLogs {
     
     Write-Host "`n📋 Recent Container Logs..." -ForegroundColor Yellow
     
-    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social")
+    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social", "nostr-files", "nostr-health-monitor", "nostr-content-discovery", "nostr-security-monitor")
     foreach ($container in $containers) {
         Write-Host "`n--- $container ---" -ForegroundColor Cyan
         try {

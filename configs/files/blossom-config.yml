@@ -1,0 +1,147 @@
+# NostrGator Blossom File Server Configuration
+# Professional NIP-96 & Blossom protocol implementation
+
+# Override the domain that is used in the blobs "url" field
+# By default it uses the domain the incoming HTTP request was made on
+publicDomain: ""
+
+# Database path for blob metadata
+databasePath: data/sqlite.db
+
+# Admin dashboard configuration
+dashboard:
+  # Enable the admin dashboard for file management
+  enabled: true
+  # Admin username
+  username: admin
+  # Password will be auto-generated and shown in logs if left blank
+  # password: ""
+
+# File discovery configuration
+discovery:
+  # Find files by querying nostr relays
+  nostr:
+    enabled: false
+    relays:
+      - wss://relay.damus.io
+      - wss://nos.lol
+  # Find files by asking upstream CDNs
+  upstream:
+    enabled: false
+    domains: []
+
+# Storage configuration
+storage:
+  # Use local storage (can be changed to s3 for cloud storage)
+  backend: local
+
+  # Remove blobs immediately when there are no owners
+  removeWhenNoOwners: false
+
+  # Local storage configuration
+  local:
+    dir: ./data/blobs
+
+  # Storage rules - checked in descending order
+  # Blobs matching a rule are kept according to the expiration time
+  # OPTIMIZED FOR MARKDOWN & PDF WORKFLOW
+  rules:
+    # Markdown files (your primary work format) - PRIORITY
+    - type: text/markdown
+      expiration: 1 year
+    # Plain text files (notes, code, documentation)
+    - type: text/plain
+      expiration: 6 months
+    # PDF documents (your primary document format) - PRIORITY
+    - type: application/pdf
+      expiration: 1 year
+    # Microsoft Office documents
+    - type: application/vnd.openxmlformats-officedocument.*
+      expiration: 6 months
+    # Other text files (CSV, JSON, XML, etc.)
+    - type: text/*
+      expiration: 3 months
+    # Other application files (ZIP, etc.)
+    - type: "application/*"
+      expiration: 3 months
+    # Images (photos, diagrams, screenshots)
+    - type: "image/*"
+      expiration: 2 months
+    # Videos (recordings, demos)
+    - type: "video/*"
+      expiration: 1 month
+    # Audio files (voice notes, recordings)
+    - type: "audio/*"
+      expiration: 1 month
+    # 3D models and other media
+    - type: "model/*"
+      expiration: 1 month
+    # All other file types
+    - type: "*"
+      expiration: 2 weeks
+
+# Upload endpoint configuration (/upload)
+upload:
+  # Enable file uploads
+  enabled: true
+  # Require authentication to upload (false = open uploads for testing)
+  requireAuth: false  # Set to true for private use
+  # Only check rules that include "pubkeys"
+  requirePubkeyInRule: false
+  # Maximum file size (50MB for large PDFs and documents)
+  maxSize: 52428800  # 50MB in bytes
+
+# Media endpoint configuration (/media)
+media:
+  # Enable media processing endpoint
+  enabled: true
+  # Require authentication for media uploads
+  requireAuth: false  # Set to true for private use
+  # Only check rules that include "pubkeys"
+  requirePubkeyInRule: false
+
+  # Image optimization settings
+  image:
+    # Image quality 0-100 (90 = high quality)
+    quality: 90
+    # Create progressive images for better loading
+    progressive: true
+    # Maximum width (1920 = Full HD)
+    maxWidth: 1920
+    # Maximum height (1080 = Full HD)
+    maxHeight: 1080
+    # Output format (webp = modern, efficient)
+    outputFormat: "webp"
+    # Maintain aspect ratio when resizing
+    maintainAspectRatio: true
+    # Remove EXIF metadata for privacy
+    keepExif: false
+    # GIF frame rate
+    fps: 30
+
+  # Video optimization settings
+  video:
+    # Video quality 0-100
+    quality: 85
+    # Maximum height (1080p)
+    maxHeight: 1080
+    # Maximum frame rate
+    maxFps: 30
+    # Output format (webm = modern, efficient)
+    format: "webm"
+    # Audio codec (opus = modern, efficient)
+    audioCodec: "opus"
+    # Video codec (vp9 = modern, efficient)
+    videoCodec: "vp9"
+
+# List endpoint configuration
+list:
+  # Allow listing files without authentication
+  requireAuth: false
+  # Allow users to list other users' files
+  allowListOthers: true
+
+# Tor configuration (for anonymous access)
+tor:
+  enabled: false
+  proxy: ""
