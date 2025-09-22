@@ -5,6 +5,7 @@
  */
 
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const fs = require('fs');
 const yaml = require('js-yaml');
@@ -56,17 +57,40 @@ class NIP05Service {
     }
     
     setupRoutes() {
-        // NIP-05 well-known endpoint
+        // Rate limiting for API endpoints
+        const apiLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // Limit each IP to 100 requests per windowMs
+            message: {
+                error: 'Too many requests from this IP, please try again later.',
+                retryAfter: '15 minutes'
+            },
+            standardHeaders: true,
+            legacyHeaders: false,
+        });
+
+        const verificationLimiter = rateLimit({
+            windowMs: 5 * 60 * 1000, // 5 minutes
+            max: 20, // Limit verification requests to 20 per 5 minutes
+            message: {
+                error: 'Too many verification requests, please try again later.',
+                retryAfter: '5 minutes'
+            },
+            standardHeaders: true,
+            legacyHeaders: false,
+        });
+
+        // NIP-05 well-known endpoint (no rate limiting for discovery)
         this.app.get('/.well-known/nostr.json', this.handleWellKnown.bind(this));
+
+        // Verification API (with rate limiting)
+        this.app.post('/api/verify', verificationLimiter, this.handleVerification.bind(this));
+        this.app.get('/api/verify/:identifier', verificationLimiter, this.handleVerificationGet.bind(this));
         
-        // Verification API
-        this.app.post('/api/verify', this.handleVerification.bind(this));
-        this.app.get('/api/verify/:identifier', this.handleVerificationGet.bind(this));
-        
-        // Identity management
-        this.app.post('/api/identities', this.handleCreateIdentity.bind(this));
-        this.app.get('/api/identities', this.handleListIdentities.bind(this));
-        this.app.delete('/api/identities/:name', this.handleDeleteIdentity.bind(this));
+        // Identity management (with rate limiting)
+        this.app.post('/api/identities', apiLimiter, this.handleCreateIdentity.bind(this));
+        this.app.get('/api/identities', apiLimiter, this.handleListIdentities.bind(this));
+        this.app.delete('/api/identities/:name', apiLimiter, this.handleDeleteIdentity.bind(this));
         
         // Health and metrics
         this.app.get('/health', this.handleHealth.bind(this));

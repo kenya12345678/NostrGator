@@ -133,8 +133,12 @@ class NIP05Service:
             
             return jsonify(verification)
             
+        except ValueError as error:
+            logger.warning(f'Invalid verification request: {str(error)[:100]}')
+            self.nip05_errors.labels(type='validation').inc()
+            return jsonify({'error': 'Invalid request format'}), 400
         except Exception as error:
-            logger.error(f'Verification error: {error}')
+            logger.error(f'Verification error: {type(error).__name__}')
             self.nip05_errors.labels(type='verification').inc()
             return jsonify({'error': 'Verification failed'}), 500
     
@@ -142,7 +146,11 @@ class NIP05Service:
         try:
             verification = self.verify_nip05(identifier)
             return jsonify(verification)
+        except ValueError as error:
+            logger.warning(f'Invalid verification request: {str(error)[:100]}')
+            return jsonify({'error': 'Invalid request format'}), 400
         except Exception as error:
+            logger.error(f'Verification error: {type(error).__name__}')
             return jsonify({'error': 'Verification failed'}), 500
     
     def verify_nip05(self, identifier):
