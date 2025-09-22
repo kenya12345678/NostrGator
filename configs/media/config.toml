@@ -1,0 +1,73 @@
+# Media Relay Configuration - File Uploads and Zaps (NIP-94, NIP-57)
+# Optimized for media content and Lightning zaps
+
+[info]
+relay_url = "ws://localhost:7003"
+name = "Private Media Relay"
+description = "Personal Nostr relay for media uploads and zaps (NIP-94, NIP-57)"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = "local@localhost"
+
+[database]
+data_directory = "db"
+engine = "sqlite"
+in_memory = false
+# Optimize for larger media metadata
+pragma_synchronous = "NORMAL"
+pragma_journal_mode = "WAL"
+pragma_cache_size = 32768  # Larger cache for media
+vacuum_frequency = "12h"  # More frequent for media cleanup
+
+[network]
+port = 8080
+address = "0.0.0.0"
+max_conn = 100
+max_conn_per_ip = 10
+
+[limits]
+# Large limits for media content
+max_event_bytes = 1048576  # 1MB for media metadata and zap receipts
+max_ws_message_bytes = 2097152  # 2MB
+max_ws_frame_bytes = 4194304  # 4MB
+messages_per_sec = 200  # Higher for media operations
+max_subscriptions = 30
+max_filters = 150
+
+[authorization]
+pubkey_whitelist = ["npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"]
+
+[retention]
+# Keep media references longer
+max_events = 2000000
+max_event_age_days = 1095  # 3 years for media
+
+[logging]
+tracing = true
+level = "info"
+
+[verified_users]
+mode = "disabled"
+
+[payments]
+enabled = false
+
+# Media and Zap specific NIPs
+[nips]
+# Enable NIP-94 for file metadata
+nip94_enabled = true
+# Enable NIP-57 for zap requests/receipts
+nip57_enabled = true
+
+# Media-specific settings
+[media]
+# Maximum file size references (not actual files)
+max_file_size_mb = 100
+# Supported media types
+allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4", "audio/mp3"]
+
+# Zap configuration for local testing
+[zaps]
+# Enable zap processing
+enabled = true
+# Mock mode for offline testing
+mock_mode = true

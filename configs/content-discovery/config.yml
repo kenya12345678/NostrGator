@@ -1,0 +1,194 @@
+# Content Discovery Service Configuration
+# Intelligent content caching from public Nostr relays
+
+# Service settings
+service:
+  name: "Nostr Content Discovery"
+  version: "1.0.0"
+  interval: 3600  # Run every hour (3600 seconds)
+  max_events_per_sync: 1000
+  
+# Public relays to sync from (high-quality, well-moderated relays)
+source_relays:
+  - url: "wss://relay.damus.io"
+    priority: 1
+    categories: ["general", "trending"]
+    max_events: 500
+    
+  - url: "wss://nos.lol"
+    priority: 1
+    categories: ["general", "social"]
+    max_events: 300
+    
+  - url: "wss://relay.snort.social"
+    priority: 2
+    categories: ["general", "media"]
+    max_events: 200
+    
+  - url: "wss://nostr.wine"
+    priority: 2
+    categories: ["longform", "articles"]
+    max_events: 100
+    
+  - url: "wss://relay.nostr.band"
+    priority: 3
+    categories: ["trending", "discovery"]
+    max_events: 200
+
+# Local relay targets (where to store discovered content)
+target_relays:
+  general:
+    url: "ws://localhost:7001"
+    kinds: [0, 1, 3, 7]  # Metadata, notes, contacts, reactions
+    
+  social:
+    url: "ws://localhost:7004"
+    kinds: [3, 30000, 30001, 30002]  # Contacts, lists
+    
+  longform:
+    url: "ws://localhost:7007"
+    kinds: [30023]  # Long-form articles
+    
+  media:
+    url: "ws://localhost:7003"
+    kinds: [1063, 1064]  # File metadata
+    
+  cache:
+    url: "ws://localhost:7005"
+    kinds: [0, 1, 3, 7, 30023]  # All for search indexing
+
+# Content filtering rules
+filters:
+  # Quality filters
+  min_reactions: 5  # Minimum reactions for content to be cached
+  min_followers: 100  # Minimum followers for author
+  max_age_hours: 24  # Only cache content from last 24 hours
+  
+  # Content type filters
+  allowed_languages: ["en", ""]  # English and unspecified
+  max_content_length: 10000  # Maximum character length
+  
+  # Spam prevention
+  blacklisted_words:
+    - "crypto scam"
+    - "get rich quick"
+    - "investment opportunity"
+    - "guaranteed returns"
+  
+  blacklisted_domains:
+    - "spam-site.com"
+    - "scam-domain.net"
+  
+  # Author reputation filters
+  min_account_age_days: 30  # Account must be at least 30 days old
+  max_posts_per_hour: 10  # Max posts per hour from same author
+
+# Trending detection
+trending:
+  enabled: true
+  time_window_hours: 6  # Look at last 6 hours for trending
+  min_engagement_score: 50  # Minimum engagement for trending
+  boost_multiplier: 2.0  # Boost score for trending content
+  
+  # Engagement scoring weights
+  weights:
+    reactions: 1.0
+    reposts: 2.0
+    replies: 1.5
+    zaps: 3.0
+
+# Rate limiting
+rate_limits:
+  requests_per_second: 10
+  max_concurrent_connections: 5
+  backoff_multiplier: 2.0
+  max_backoff_seconds: 300
+
+# Logging and monitoring
+logging:
+  level: "info"
+  file: "/var/log/content-discovery.log"
+  max_size_mb: 100
+  max_files: 5
+
+# Metrics
+metrics:
+  enabled: true
+  port: 9090
+  endpoint: "/metrics"
+  
+# Health check
+health:
+  enabled: true
+  port: 8080
+  endpoint: "/health"
+
+# Negentropy sync settings
+negentropy:
+  enabled: true
+  chunk_size: 1000
+  max_sync_time_seconds: 300
+  retry_attempts: 3
+  retry_delay_seconds: 30
+
+# Content categories and routing
+content_routing:
+  # Route different content types to appropriate relays
+  kind_0:  # Metadata
+    targets: ["general", "cache"]
+    priority: "high"
+    
+  kind_1:  # Text notes
+    targets: ["general", "cache"]
+    priority: "medium"
+    filters: ["trending", "quality"]
+    
+  kind_3:  # Contacts
+    targets: ["social", "cache"]
+    priority: "low"
+    
+  kind_7:  # Reactions
+    targets: ["general", "cache"]
+    priority: "low"
+    
+  kind_30023:  # Long-form
+    targets: ["longform", "cache"]
+    priority: "high"
+    filters: ["quality"]
+    
+  kind_1063:  # File metadata
+    targets: ["media", "cache"]
+    priority: "medium"
+
+# Discovery algorithms
+algorithms:
+  # Social graph expansion
+  social_discovery:
+    enabled: true
+    follow_depth: 2  # Follow friends of friends
+    min_mutual_follows: 3
+    
+  # Topic-based discovery
+  topic_discovery:
+    enabled: true
+    hashtag_tracking: true
+    topic_similarity_threshold: 0.7
+    
+  # Temporal discovery
+  temporal_discovery:
+    enabled: true
+    peak_hours: [9, 12, 18, 21]  # UTC hours when content is most active
+    timezone_adjustment: true
+
+# Emergency controls
+emergency:
+  # Kill switch for content discovery
+  enabled: true
+  max_storage_gb: 10  # Stop if storage exceeds 10GB
+  max_events_per_day: 50000  # Daily event limit
+  
+  # Auto-pause conditions
+  auto_pause:
+    high_error_rate: 0.1  # Pause if >10% error rate
+    low_quality_score: 0.3  # Pause if quality drops below 30%
+    resource_exhaustion: true  # Pause if system resources low

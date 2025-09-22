@@ -1,0 +1,84 @@
+# NostrGator NIP-05 Identity Verification Configuration
+# DNS-based identity verification for trust and reputation
+
+nip05:
+  enabled: true
+  server_enabled: true  # Host NIP-05 identities for users
+  verification_enabled: true  # Verify incoming NIP-05 claims
+  
+# NIP-05 Server Configuration (for hosting identities)
+server:
+  domain: "localhost"  # Change to your domain
+  port: 3005
+  https_enabled: false  # Set to true in production with SSL
+  
+  # Default identities to serve
+  identities:
+    admin:
+      pubkey: "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+      relays:
+        - "ws://localhost:7001"
+        - "ws://localhost:7002"
+        - "ws://localhost:7003"
+    
+    # Example user identity
+    user:
+      pubkey: "npub1example123456789abcdef"
+      relays:
+        - "ws://localhost:7001"
+        - "ws://localhost:7002"
+
+# NIP-05 Verification Configuration
+verification:
+  # Cache verified identities to avoid repeated DNS lookups
+  cache_duration_hours: 24
+  max_cache_entries: 1000
+  
+  # Verification timeouts
+  dns_timeout_seconds: 10
+  http_timeout_seconds: 15
+  max_retries: 3
+  
+  # Trust levels based on verification
+  trust_levels:
+    verified_domain: 5      # Verified NIP-05 with domain
+    verified_subdomain: 3   # Verified NIP-05 with subdomain
+    unverified: 0          # No NIP-05 or failed verification
+    
+  # Trusted domains (higher trust scores)
+  trusted_domains:
+    - "bitcoin.org"
+    - "nostr.com"
+    - "damus.io"
+    - "primal.net"
+    - "iris.to"
+
+# Integration with relay access control
+relay_integration:
+  # Boost access for verified users
+  verified_user_benefits:
+    rate_limit_multiplier: 2.0    # 2x normal rate limits
+    priority_processing: true     # Process events faster
+    extended_storage: true        # Keep events longer
+    
+  # Whitelist management
+  auto_whitelist_verified: false  # Don't auto-whitelist (security)
+  require_verification_for_whitelist: true  # Require NIP-05 for whitelist
+
+# Monitoring and logging
+monitoring:
+  prometheus_metrics: true
+  log_verification_attempts: true
+  log_failed_verifications: true
+  alert_on_spoofing_attempts: true
+
+# Security settings
+security:
+  # Rate limiting for verification requests
+  max_verifications_per_hour: 100
+  max_verifications_per_ip: 10
+  
+  # Prevent abuse
+  blacklist_failed_domains: true
+  blacklist_threshold: 5  # Block domain after 5 failed verifications
+  blacklist_duration_hours: 24

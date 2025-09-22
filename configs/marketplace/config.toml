@@ -1,0 +1,75 @@
+# Marketplace Relay Configuration (NIP-15, NIP-99)
+# Specialized for commerce, classified ads, and marketplace activities
+
+[info]
+relay_url = "ws://localhost:7009"
+name = "Private Marketplace Relay"
+description = "Specialized relay for commerce, classified ads, and marketplace activities (NIP-15, NIP-99)"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = ""
+favicon = ""
+relay_icon = ""
+
+[database]
+data_directory = "db"
+in_memory = false
+engine = "sqlite"
+
+[network]
+port = 8080
+address = "0.0.0.0"
+remote_ip_header = "x-forwarded-for"
+max_conn = 128
+ping_interval_seconds = 5
+
+[options]
+reject_future_seconds = 1800  # 30 minutes (marketplace items can be scheduled)
+reject_past_seconds = 31536000  # 1 year (keep marketplace history)
+
+[limits]
+messages_per_sec = 100
+subscriptions_per_min = 60
+db_conns_per_client = 4
+max_event_bytes = 262144  # 256KB for detailed product descriptions
+max_ws_message_bytes = 262144
+max_ws_frame_bytes = 262144
+broadcast_buffer = 16384
+event_persist_buffer = 4096
+event_kind_allowlist = [
+    0,     # Metadata
+    1,     # Text notes
+    3,     # Contacts
+    7,     # Reactions
+    30017, # Marketplace stalls (NIP-15)
+    30018, # Marketplace products (NIP-15)
+    1059,  # Gift wraps
+    9735,  # Zap receipts
+    10002, # Relay list metadata
+    30023, # Long-form content (for detailed product descriptions)
+    30078, # Application-specific data
+    30402, # Classified listing (NIP-99)
+    30403  # Draft classified listing (NIP-99)
+]
+event_kind_blocklist = []
+
+[pay_to_relay]
+enabled = false
+
+[authorization]
+pubkey_whitelist = [
+    "884704bd421721e292906f4c90da4a9b8e7043e5b66ced736fc5e7e90b5dd5c2"  # Your pubkey
+]
+nip42_auth = false
+nip42_dms = false
+
+[verified_users]
+mode = "whitelist"
+verify_expiration = "1y"
+verify_update_frequency = "24h"
+max_consecutive_failures = 20
+
+[logging]
+tracing_level = "INFO"
+
+[diagnostics]
+tracing_level = "INFO"

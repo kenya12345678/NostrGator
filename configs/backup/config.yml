@@ -1,0 +1,184 @@
+# NostrGator Backup System Configuration
+# Nuclear-proof backup and disaster recovery settings
+
+backup:
+  # Backup triggers
+  triggers:
+    # Trigger backup on every Lightning transaction
+    on_transactions: true
+    
+    # Trigger backup on channel events (open/close/update)
+    on_channel_events: true
+    
+    # Scheduled backups regardless of activity
+    scheduled:
+      enabled: true
+      frequency: "daily"
+      time: "03:00"  # 3 AM local time
+    
+    # Manual backup triggers via API
+    manual_api_enabled: true
+  
+  # Rolling retention policy
+  retention:
+    # Keep daily backups for 30 days
+    daily_days: 30
+    
+    # Keep weekly backups for 6 months (26 weeks)
+    weekly_weeks: 26
+    
+    # Keep monthly backups for 2 years (24 months)
+    monthly_months: 24
+    
+    # Keep seed backups permanently (with versioning)
+    seed_permanent: true
+    seed_max_versions: 10
+  
+  # Multi-tier storage locations
+  storage:
+    # Tier 1: Local encrypted volume (immediate access)
+    local_encrypted:
+      enabled: true
+      path: "./data/backups/encrypted"
+      encryption: "AES-256"
+    
+    # Tier 2: Windows user profile backup folder
+    windows_profile:
+      enabled: true
+      path: "%USERPROFILE%/NostrGator/Backups"
+      auto_create_folder: true
+    
+    # Tier 3: Cloud integration (OneDrive/Google Drive)
+    cloud_sync:
+      enabled: true
+      auto_detect_onedrive: true
+      auto_detect_google_drive: true
+      custom_cloud_path: ""
+    
+    # Tier 4: External drive detection and backup
+    external_drive:
+      enabled: true
+      auto_detect: true
+      preferred_labels: ["BACKUP", "NOSTRGATOR", "LIGHTNING"]
+      min_free_space_gb: 1
+  
+  # Encryption settings
+  encryption:
+    # Master password for backup encryption
+    master_password: "CHANGE_THIS_PASSWORD"
+    
+    # Separate encryption for seed vs operational data
+    separate_seed_encryption: true
+    seed_password: "CHANGE_THIS_SEED_PASSWORD"
+    
+    # Key derivation settings
+    pbkdf2_iterations: 100000
+    salt_length: 32
+    
+    # Encryption algorithm
+    algorithm: "AES-256-GCM"
+
+# Critical data to backup
+data_sources:
+  # LND critical data
+  lnd:
+    # 24-word seed phrase (aezeed)
+    seed_file: "/lnd/data/chain/bitcoin/mainnet/wallet.db"
+    
+    # Static Channel Backup (SCB)
+    scb_file: "/lnd/data/chain/bitcoin/mainnet/channel.backup"
+    
+    # Macaroons (authentication tokens)
+    admin_macaroon: "/lnd/data/chain/bitcoin/mainnet/admin.macaroon"
+    readonly_macaroon: "/lnd/data/chain/bitcoin/mainnet/readonly.macaroon"
+    
+    # TLS certificate
+    tls_cert: "/lnd/tls.cert"
+    tls_key: "/lnd/tls.key"
+    
+    # Configuration
+    lnd_conf: "/lnd/lnd.conf"
+  
+  # LNbits data
+  lnbits:
+    database: "/lnbits/data/database.sqlite3"
+    config: "/lnbits/.env"
+    extensions_data: "/lnbits/data/extensions"
+  
+  # NostrGator configuration
+  nostrgator:
+    docker_compose: "./docker-compose.yml"
+    env_file: "./.env"
+    relay_configs: "./configs"
+
+# Backup verification
+verification:
+  # Daily integrity checks
+  daily_checksum_verification: true
+  
+  # Weekly restoration tests
+  weekly_restore_tests:
+    enabled: true
+    test_environment: "temporary"
+    cleanup_after_test: true
+  
+  # Monthly full disaster recovery simulation
+  monthly_full_tests:
+    enabled: true
+    notification_on_failure: true
+    auto_fix_issues: false
+  
+  # Real-time backup health monitoring
+  health_monitoring:
+    enabled: true
+    check_interval_minutes: 15
+    alert_on_corruption: true
+    alert_on_missing_backups: true
+
+# Disaster recovery settings
+disaster_recovery:
+  # Auto-restore preferences
+  auto_restore:
+    enabled: true
+    prefer_most_recent: true
+    verify_before_restore: true
+  
+  # Recovery scenarios
+  scenarios:
+    docker_corruption:
+      auto_restore_containers: true
+      preserve_data_volumes: true
+    
+    complete_system_failure:
+      require_manual_confirmation: true
+      restore_from_cloud_first: true
+    
+    partial_data_loss:
+      selective_file_recovery: true
+      backup_before_restore: true
+    
+    seed_only_recovery:
+      guide_user_through_process: true
+      create_new_node_identity: false
+
+# Emergency settings
+emergency:
+  # Emergency contact information
+  contact_info:
+    enabled: false
+    email: ""
+    phone: ""
+  
+  # Printable recovery instructions
+  recovery_sheet:
+    auto_generate: true
+    include_qr_codes: true
+    update_on_changes: true
+    path: "./emergency-recovery-sheet.pdf"
+  
+  # Panic mode (immediate backup of everything)
+  panic_backup:
+    enabled: true
+    trigger_keyword: "PANIC_BACKUP_NOW"
+    backup_everything: true
+    notify_completion: true

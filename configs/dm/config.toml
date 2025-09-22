@@ -1,0 +1,63 @@
+# DM Relay Configuration - Private Messages with NIP-04 Support
+# Optimized for encrypted direct messages
+
+[info]
+relay_url = "ws://localhost:7002"
+name = "Private DM Relay"
+description = "Personal Nostr relay for encrypted direct messages (NIP-04)"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = "local@localhost"
+
+[database]
+data_directory = "db"
+engine = "sqlite"
+in_memory = false
+# Optimize for DM storage
+pragma_synchronous = "FULL"  # Extra safety for private messages
+pragma_journal_mode = "WAL"
+pragma_cache_size = 8192
+vacuum_frequency = "24h"
+
+[network]
+port = 8080
+address = "0.0.0.0"
+max_conn = 50  # Lower for DM-focused usage
+max_conn_per_ip = 5
+
+[limits]
+# Larger limits for encrypted DM content
+max_event_bytes = 131072  # 128KB for encrypted messages
+max_ws_message_bytes = 262144  # 256KB
+max_ws_frame_bytes = 1048576  # 1MB
+messages_per_sec = 50  # Lower rate for DMs
+max_subscriptions = 10
+max_filters = 50
+
+[authorization]
+# Strict whitelist for DMs
+pubkey_whitelist = ["npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"]
+
+[retention]
+# Keep DMs longer for privacy
+max_events = 500000
+max_event_age_days = 730  # 2 years for important DMs
+
+[logging]
+tracing = true
+level = "info"
+
+# DM-specific settings
+[grpc]
+# Disable gRPC for simplicity
+enabled = false
+
+[verified_users]
+mode = "disabled"
+
+[payments]
+enabled = false
+
+# NIP-04 specific configuration
+[nips]
+# Enable NIP-04 for encrypted DMs
+nip04_enabled = true

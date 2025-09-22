@@ -1,0 +1,75 @@
+# Social Relay Configuration - Lists and Communities (NIP-51)
+# Optimized for social curation and community features
+
+[info]
+relay_url = "ws://localhost:7004"
+name = "Private Social Relay"
+description = "Personal Nostr relay for lists, communities and social curation (NIP-51)"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = "local@localhost"
+
+[database]
+data_directory = "db"
+engine = "sqlite"
+in_memory = false
+# Optimize for list operations
+pragma_synchronous = "NORMAL"
+pragma_journal_mode = "WAL"
+pragma_cache_size = 16384
+vacuum_frequency = "24h"
+
+[network]
+port = 8080
+address = "0.0.0.0"
+max_conn = 75  # Moderate for social features
+max_conn_per_ip = 8
+
+[limits]
+# Moderate limits for social content
+max_event_bytes = 262144  # 256KB for large lists
+max_ws_message_bytes = 524288  # 512KB
+max_ws_frame_bytes = 1048576  # 1MB
+messages_per_sec = 75
+max_subscriptions = 25
+max_filters = 100
+
+[authorization]
+pubkey_whitelist = ["npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"]
+
+[retention]
+# Keep social data for extended periods
+max_events = 1500000
+max_event_age_days = 1095  # 3 years for social history
+
+[logging]
+tracing = true
+level = "info"
+
+[verified_users]
+mode = "disabled"
+
+[payments]
+enabled = false
+
+# Social-specific NIPs
+[nips]
+# Enable NIP-51 for lists (follow lists, mute lists, etc.)
+nip51_enabled = true
+# Enable NIP-58 for badges
+nip58_enabled = true
+
+# Social features configuration
+[social]
+# List management
+max_list_size = 10000  # Large lists for comprehensive curation
+max_lists_per_user = 100
+# Community features
+enable_communities = true
+max_community_size = 5000
+
+# Curation settings
+[curation]
+# Enable content filtering
+content_filtering = true
+# Spam prevention
+spam_protection = true

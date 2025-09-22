@@ -1,0 +1,104 @@
+# NostrGator Event Mirroring Configuration
+# Hybrid sovereignty: Local control + Global reach
+
+mirroring:
+  enabled: true
+  mode: "hybrid"  # hybrid, local-only, mirror-only
+  
+# Local relays to monitor and mirror from
+local_relays:
+  - url: "ws://nostr-general:8080"
+    name: "general"
+    mirror_outbound: true
+    mirror_inbound: true
+  - url: "ws://nostr-social:8080" 
+    name: "social"
+    mirror_outbound: true
+    mirror_inbound: true
+  - url: "ws://nostr-media:8080"
+    name: "media"
+    mirror_outbound: false  # Keep media local for sovereignty
+    mirror_inbound: true
+
+# Public relays for backup and discovery
+public_relays:
+  - url: "wss://relay.damus.io"
+    name: "damus"
+    priority: 1
+    max_events_per_hour: 100
+  - url: "wss://nostr.wine"
+    name: "wine" 
+    priority: 2
+    max_events_per_hour: 50
+  - url: "wss://nos.lol"
+    name: "nos"
+    priority: 3
+    max_events_per_hour: 50
+
+# Event filtering rules
+event_filters:
+  # Mirror outbound (local -> public)
+  outbound:
+    # Text notes (kind 1) from whitelisted users
+    - kind: 1
+      authors: "whitelist"  # Use relay whitelist
+      max_age_hours: 24
+      
+    # Metadata updates (kind 0)
+    - kind: 0
+      authors: "whitelist"
+      max_age_hours: 168  # 1 week
+      
+    # Contact lists (kind 3)
+    - kind: 3
+      authors: "whitelist"
+      max_age_hours: 168
+      
+    # Long-form content (kind 30023)
+    - kind: 30023
+      authors: "whitelist"
+      max_age_hours: 720  # 30 days
+      
+  # Mirror inbound (public -> local)
+  inbound:
+    # High-quality content from trusted sources
+    - kind: 1
+      min_reactions: 5  # Popular content
+      max_age_hours: 6
+      
+    # Metadata from followed users
+    - kind: 0
+      authors: "follows"  # From contact lists
+      max_age_hours: 24
+      
+    # Trending hashtags
+    - kind: 1
+      tags: ["#nostr", "#bitcoin", "#freedom", "#privacy"]
+      max_age_hours: 12
+
+# Rate limiting and performance
+rate_limits:
+  events_per_minute: 10
+  max_concurrent_connections: 5
+  retry_delay_seconds: 30
+  max_retries: 3
+
+# Privacy and security
+privacy:
+  use_tor_proxy: true
+  tor_proxy_url: "socks5://nostr-tor-proxy:9050"
+  randomize_timing: true
+  min_delay_seconds: 5
+  max_delay_seconds: 30
+
+# Storage and cleanup
+storage:
+  max_mirror_events: 10000
+  cleanup_interval_hours: 24
+  keep_failed_events_hours: 6
+
+# Monitoring
+monitoring:
+  prometheus_metrics: true
+  log_level: "info"
+  health_check_interval: 60

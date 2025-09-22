@@ -1,0 +1,63 @@
+# General Relay Configuration - Core Notes and Feeds
+# Using nostr-rs-relay for maximum compatibility and stability
+
+[info]
+relay_url = "ws://localhost:7001"
+name = "Private General Relay"
+description = "Personal Nostr relay for general notes and feeds"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = "local@localhost"
+
+[database]
+data_directory = "db"
+engine = "sqlite"
+in_memory = false
+# Optimize for personal use
+pragma_synchronous = "NORMAL"
+pragma_journal_mode = "WAL"
+pragma_cache_size = 16384
+# Vacuum database daily for performance
+vacuum_frequency = "24h"
+
+[network]
+port = 8080
+address = "0.0.0.0"  # Docker internal - external binding handled by compose
+# Connection limits for personal use
+max_conn = 100
+max_conn_per_ip = 10
+
+[limits]
+# Event size limits
+max_event_bytes = 65536  # 64KB for general notes
+max_ws_message_bytes = 131072  # 128KB
+max_ws_frame_bytes = 1048576  # 1MB
+# Rate limiting for stability & spam prevention
+messages_per_sec = 50  # Reduced for better spam protection
+max_subscriptions = 20
+max_filters = 100
+# Enhanced anti-spam measures
+events_per_minute = 30  # Prevent event flooding
+duplicate_filter_window = 60  # Seconds to detect duplicate events
+
+[authorization]
+# Whitelist mode - only allow your pubkey
+pubkey_whitelist = ["npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"]
+
+[retention]
+# Keep events for 1 year
+max_events = 1000000
+max_event_age_days = 365
+
+[logging]
+# Structured logging for debugging
+tracing = true
+level = "info"
+
+# NIPs supported by this relay
+[verified_users]
+# No verification required for private use
+mode = "disabled"
+
+[payments]
+# No payments for private relay
+enabled = false

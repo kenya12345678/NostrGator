@@ -1,0 +1,80 @@
+# Bridge Relay Configuration
+# Cross-protocol integration (RSS, ActivityPub, Matrix, etc.)
+
+[info]
+relay_url = "ws://localhost:7011"
+name = "Private Bridge Relay"
+description = "Cross-protocol integration relay for RSS, ActivityPub, Matrix, and other bridges"
+pubkey = "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z"
+contact = ""
+favicon = ""
+relay_icon = ""
+
+[database]
+data_directory = "db"
+in_memory = false
+engine = "sqlite"
+
+[network]
+port = 8080
+address = "0.0.0.0"
+remote_ip_header = "x-forwarded-for"
+max_conn = 128
+ping_interval_seconds = 5
+
+[options]
+reject_future_seconds = 3600  # 1 hour (bridged content can be delayed)
+reject_past_seconds = 31536000  # 1 year (keep bridge history)
+
+[limits]
+messages_per_sec = 50
+subscriptions_per_min = 30
+db_conns_per_client = 4
+max_event_bytes = 131072
+max_ws_message_bytes = 131072
+max_ws_frame_bytes = 131072
+broadcast_buffer = 16384
+event_persist_buffer = 4096
+event_kind_allowlist = [
+    0,     # Metadata
+    1,     # Text notes (bridged content)
+    3,     # Contacts
+    6,     # Reposts (for bridged shares)
+    7,     # Reactions
+    9735,  # Zap receipts
+    10002, # Relay list metadata
+    30023, # Long-form content (bridged articles)
+    30078, # Application-specific data (bridge metadata)
+    1063,  # File metadata (bridged media)
+    1311,  # Live chat message (bridged chat)
+    30311, # Live event (bridged live content)
+    30315, # User statuses (bridged status updates)
+    30402, # Classified listing (bridged marketplace)
+    31922, # Date-based calendar event (bridged calendar)
+    31923, # Time-based calendar event (bridged calendar)
+    31924, # Calendar (bridged calendar)
+    31925  # Calendar event RSVP (bridged RSVP)
+]
+event_kind_blocklist = []
+
+[pay_to_relay]
+enabled = false
+
+[authorization]
+pubkey_whitelist = [
+    "884704bd421721e292906f4c90da4a9b8e7043e5b66ced736fc5e7e90b5dd5c2"  # Your pubkey
+]
+nip42_auth = false
+nip42_dms = false
+
+[verified_users]
+mode = "whitelist"
+verify_expiration = "1y"
+verify_update_frequency = "24h"
+max_consecutive_failures = 20
+
+[logging]
+tracing_level = "INFO"
+
+[diagnostics]
+tracing_level = "INFO"

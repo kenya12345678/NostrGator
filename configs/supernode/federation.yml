@@ -1,0 +1,56 @@
+# NostrGator Supernode Federation Configuration
+# Transforms your relay suite into a discovery nexus
+
+federation:
+  enabled: true
+  supernode_tag: "nostrgator-supernode"
+  trust_threshold: 3  # Minimum endorsements for trusted status
+  
+discovery:
+  # Public relays for NIP-65 publishing and peer discovery
+  public_relays:
+    - "wss://relay.damus.io"
+    - "wss://nostr.wine" 
+    - "wss://nos.lol"
+    - "wss://relay.snort.social"
+  
+  # Your relay fleet for federation
+  local_relays:
+    read:
+      - "ws://localhost:7777"  # General
+      - "ws://localhost:7778"  # Social
+      - "ws://localhost:7779"  # Media
+      - "ws://localhost:7780"  # DM
+    write:
+      - "ws://localhost:7777"  # General (primary write)
+      - "ws://localhost:7778"  # Social
+  
+heartbeat:
+  interval_seconds: 60
+  timeout_seconds: 10
+  probe_type: "smart"  # smart probes vs basic pings
+  geo_clustering: true
+  latency_threshold_ms: 200
+  
+trust:
+  endorsement_decay_days: 7
+  min_endorsers: 3
+  geo_diversity_required: true
+  negative_tag_weight: -2
+  
+routing:
+  max_hops: 3
+  prefer_endorsed: true
+  latency_weight: 0.7
+  trust_weight: 0.3
+  
+visualization:
+  port: 3001
+  enable_3d: true
+  update_interval_ms: 5000
+  max_nodes_display: 100
+  
+metrics:
+  prometheus_export: true
+  export_port: 9090
+  retention_hours: 168  # 1 week

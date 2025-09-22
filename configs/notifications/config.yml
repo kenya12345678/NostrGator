@@ -1,0 +1,105 @@
+# NostrGator Notification System Configuration
+# Controls Windows toast notifications for all system events
+
+notifications:
+  # Notification levels: ALL, CRITICAL_ONLY, WALLET_ONLY, SECURITY_ONLY, NONE
+  level: "CRITICAL_ONLY"
+  
+  # Quiet hours - no notifications during these times
+  quiet_hours:
+    enabled: true
+    start: "22:00"
+    end: "07:00"
+    timezone: "local"
+  
+  # Notification persistence in Windows Action Center
+  persist_in_action_center: true
+  
+  # Sound settings
+  sound:
+    enabled: true
+    critical_only: true
+  
+  # Service-specific notification settings
+  services:
+    # Relay health notifications
+    relay_health:
+      enabled: true
+      notify_on_down: true
+      notify_on_up: true
+      notify_on_degraded: true
+      notify_on_recovery: true
+    
+    # Lightning wallet notifications
+    wallet_events:
+      enabled: true
+      notify_on_transaction: true
+      notify_on_channel_open: true
+      notify_on_channel_close: true
+      notify_on_low_balance: true
+      low_balance_threshold_sats: 10000
+      notify_on_payment_failure: true
+    
+    # Security alerts
+    security_alerts:
+      enabled: true
+      notify_on_failed_auth: true
+      notify_on_suspicious_activity: true
+      notify_on_config_changes: true
+      notify_on_unauthorized_access: true
+    
+    # Backup system notifications
+    backup_events:
+      enabled: true
+      notify_on_backup_success: false  # Only failures by default
+      notify_on_backup_failure: true
+      notify_on_verification_failure: true
+      notify_on_storage_issues: true
+    
+    # System health notifications
+    system_health:
+      enabled: true
+      notify_on_disk_space_low: true
+      disk_space_threshold_gb: 5
+      notify_on_memory_high: true
+      memory_threshold_percent: 90
+      notify_on_docker_issues: true
+
+# Notification templates
+templates:
+  wallet_transaction:
+    title: "⚡ Lightning Transaction"
+    body: "{{type}}: {{amount}} sats {{direction}}"
+    icon: "lightning"
+  
+  relay_down:
+    title: "🔴 Relay Offline"
+    body: "{{relay_name}} relay is not responding"
+    icon: "error"
+  
+  backup_failure:
+    title: "💾 Backup Failed"
+    body: "{{backup_type}} backup failed: {{error}}"
+    icon: "warning"
+  
+  security_alert:
+    title: "🛡️ Security Alert"
+    body: "{{alert_type}}: {{details}}"
+    icon: "security"
+
+# Advanced settings
+advanced:
+  # Maximum notifications per hour (rate limiting)
+  max_notifications_per_hour: 20
+  
+  # Notification grouping (combine similar notifications)
+  group_similar_notifications: true
+  grouping_window_minutes: 5
+  
+  # Retry failed notifications
+  retry_failed_notifications: true
+  max_retries: 3
+  
+  # Log all notification events
+  log_notifications: true
+  log_level: "INFO"

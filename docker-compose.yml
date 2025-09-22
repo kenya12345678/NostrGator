@@ -1,0 +1,543 @@
+version: '3.8'
+
+services:
+  general-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-general
+    ports:
+      - "127.0.0.1:7001:8080"  # Localhost-only binding
+    volumes:
+      - ./data/general:/usr/src/app/db:Z
+      - ./configs/general/config.toml:/usr/src/app/config.toml:ro
+    environment:
+      - RUST_LOG=info,nostr_rs_relay=info
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  dm-relay:
+    image: scsibug/nostr-rs-relay:latest  # Using nostr-rs-relay for DMs (more reliable than Haven)
+    container_name: nostr-dm
+    ports:
+      - "127.0.0.1:7002:8080"
+    volumes:
+      - ./data/dm:/usr/src/app/db:Z
+      - ./configs/dm/config.toml:/usr/src/app/config.toml:ro
+    environment:
+      - RUST_LOG=info,nostr_rs_relay=info
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  media-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-media
+    ports:
+      - "127.0.0.1:7003:8080"
+    volumes:
+      - ./data/media:/usr/src/app/db:Z
+      - ./configs/media/config.toml:/usr/src/app/config.toml:ro
+    environment:
+      - RUST_LOG=info,nostr_rs_relay=info
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  social-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-social
+    ports:
+      - "127.0.0.1:7004:8080"
+    volumes:
+      - ./data/social:/usr/src/app/db:Z
+      - ./configs/social/config.toml:/usr/src/app/config.toml:ro
+    environment:
+      - RUST_LOG=info,nostr_rs_relay=info
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  # Cache Relay - High-performance search and discovery
+  nostr-cache:
+    image: dockurr/strfry:latest
+    container_name: nostr-cache
+    ports:
+      - "127.0.0.1:7005:7777"
+    volumes:
+      - ./data/cache:/app/strfry-db
+      - ./configs/cache:/etc/strfry
+    environment:
+      - STRFRY_DB_PARAMS__MAX_DBS=100
+      - STRFRY_RELAY__PORT=7777
+      - STRFRY_RELAY__BIND=0.0.0.0
+    restart: unless-stopped
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7777"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  # Automated Updates - Watchtower
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: nostr-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 2 * * *  # 2 AM daily
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_REVIVE_STOPPED=false
+      - WATCHTOWER_ROLLING_RESTART=true
+      - WATCHTOWER_SCOPE=nostr-relay-suite
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_DEBUG=true
+    restart: unless-stopped
+    mem_limit: 128m
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  # Health Monitoring Dashboard
+  health-monitor:
+    image: louislam/uptime-kuma:latest
+    container_name: nostr-health-monitor
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./data/monitoring:/app/data
+    environment:
+      - UPTIME_KUMA_DISABLE_FRAME_SAMEORIGIN=1
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  # Content Discovery Service - Intelligent content caching from public relays
+  content-discovery:
+    image: python:3.11-alpine
+    container_name: nostr-content-discovery
+    ports:
+      - "127.0.0.1:7080:8080"
+    volumes:
+      - ./configs/content-discovery:/config:ro
+      - ./scripts/content-discovery:/app:ro
+      - ./data/content-discovery:/data
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python content_discovery.py"
+    environment:
+      - CONFIG_PATH=/config/config.yml
+      - DATA_PATH=/data
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    depends_on:
+      - general-relay
+      - nostr-cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8080/health')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Security Monitor Service - Vulnerability and enhancement tracking
+  security-monitor:
+    image: python:3.11-alpine
+    container_name: nostr-security-monitor
+    ports:
+      - "127.0.0.1:7081:8081"
+    volumes:
+      - ./configs/security-monitor:/config:ro
+      - ./scripts/security-monitor:/app:ro
+      - ./data/security-monitor:/data
+      - ./:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python security_monitor.py"
+    environment:
+      - CONFIG_PATH=/config/config.yml
+      - DATA_PATH=/data
+      - LOG_LEVEL=info
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8081/health')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # ============================================================================
+  # EXPANDED NOSTR INFRASTRUCTURE - COMPREHENSIVE FEATURE SET
+  # ============================================================================
+
+  # NostrCheck File Server - Professional NIP-96 & Blossom implementation
+  file-server:
+    image: quentintaranpino/nostrcheck-server:latest
+    container_name: nostr-files
+    ports:
+      - "127.0.0.1:7006:3000"  # NostrCheck runs on port 3000 internally
+    volumes:
+      - ./data/files:/app/uploads
+      - ./configs/files/nostrcheck.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+    networks:
+      - nostr-network
+
+  # Long-Form Content Relay - Articles, blogs, newsletters (NIP-23)
+  longform-relay:
+    image: dockurr/strfry:latest
+    container_name: nostr-longform
+    ports:
+      - "127.0.0.1:7007:7777"
+    volumes:
+      - ./data/longform:/app/strfry-db
+      - ./configs/longform/strfry.conf:/etc/strfry.conf
+    networks:
+      - nostr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7777"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 1g
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Live Events Relay - Streaming, live activities (NIP-53)
+  live-events-relay:
+    image: dockurr/strfry:latest
+    container_name: nostr-live
+    ports:
+      - "127.0.0.1:7008:7777"
+    volumes:
+      - ./data/live:/app/strfry-db
+      - ./configs/live/strfry.conf:/etc/strfry.conf
+    networks:
+      - nostr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7777"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 512m
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Marketplace Relay - Commerce, classified ads (NIP-15, NIP-99)
+  marketplace-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-marketplace
+    ports:
+      - "127.0.0.1:7009:8080"
+    volumes:
+      - ./data/marketplace:/usr/src/app/db
+      - ./configs/marketplace/config.toml:/usr/src/app/config.toml
+    networks:
+      - nostr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 512m
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Games & Interactive Relay - Chess, games, interactive content
+  games-relay:
+    image: dockurr/strfry:latest
+    container_name: nostr-games
+    ports:
+      - "127.0.0.1:7010:7777"
+    volumes:
+      - ./data/games:/app/strfry-db
+      - ./configs/games/strfry.conf:/etc/strfry.conf
+    networks:
+      - nostr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7777"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 512m
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Bridge Relay - Cross-protocol integration (RSS, ActivityPub, Matrix)
+  bridge-relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: nostr-bridge
+    ports:
+      - "127.0.0.1:7011:8080"
+    volumes:
+      - ./data/bridge:/usr/src/app/db
+      - ./configs/bridge/config.toml:/usr/src/app/config.toml
+    networks:
+      - nostr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 256m
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # ============================================================================
+  # PRIVACY & SECURITY ENHANCEMENTS
+  # ============================================================================
+
+  # Tor Proxy - Anonymous federation without VPN overhead
+  tor-proxy:
+    image: dperson/torproxy:latest
+    container_name: nostr-tor-proxy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9050:9050"  # SOCKS5 proxy
+      - "127.0.0.1:8118:8118"  # HTTP proxy
+    environment:
+      - TOR_NewCircuitPeriod=60
+      - TOR_MaxCircuitDirtiness=300
+      - TOR_NumEntryGuards=8
+    healthcheck:
+      test: ["CMD", "curl", "--socks5", "127.0.0.1:9050", "--connect-timeout", "10", "https://check.torproject.org/api/ip"]
+      interval: 300s
+      timeout: 30s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Supernode Federation Engine - Discovery and trust mesh
+  supernode-federation:
+    image: python:3.11-alpine
+    container_name: nostr-supernode-federation
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:3002"  # Federation API
+      - "127.0.0.1:3003:3003"  # 3D Visualization Dashboard
+      - "127.0.0.1:9090:9090"  # Prometheus metrics
+    volumes:
+      - ./configs/supernode:/config:ro
+      - ./scripts/supernode:/app:ro
+      - ./data/supernode:/data
+      - ./data/federation:/federation
+    working_dir: /app
+    command: sh -c "pip install websockets aiohttp prometheus_client pyyaml && python federation_engine.py"
+    environment:
+      - CONFIG_PATH=/config/federation.yml
+      - DATA_PATH=/data
+      - FEDERATION_PATH=/federation
+      - LOG_LEVEL=info
+      - ENABLE_SUPERNODE_FED=${ENABLE_SUPERNODE_FED}
+      - NOSTR_PUBKEY=${NOSTR_PUBKEY}
+      - TOR_PROXY=socks5://nostr-tor-proxy:9050
+    depends_on:
+      - tor-proxy
+      - content-discovery
+      - security-monitor
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:3002/health')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Event Mirroring - Hybrid sovereignty with global reach
+  event-mirror:
+    image: python:3.11-alpine
+    container_name: nostr-event-mirror
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9091:9091"  # Mirror metrics
+    volumes:
+      - ./configs/event-mirror:/config:ro
+      - ./scripts/event-mirror:/app:ro
+      - ./data/mirror:/data
+    working_dir: /app
+    command: sh -c "pip install websockets aiohttp prometheus_client pyyaml && python mirror_engine.py"
+    environment:
+      - MIRROR_CONFIG_PATH=/config/mirror.yml
+      - DATA_PATH=/data
+      - LOG_LEVEL=info
+    depends_on:
+      - general-relay
+      - social-relay
+      - media-relay
+      - tor-proxy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:9091/metrics')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # NIP-05 Identity Verification - DNS-based trust and reputation
+  nip05-service:
+    image: python:3.11-alpine
+    container_name: nostr-nip05
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3005:3005"  # NIP-05 server
+      - "127.0.0.1:9092:9092"  # NIP-05 metrics
+    volumes:
+      - ./configs/nip05:/config:ro
+      - ./scripts/nip05:/app:ro
+      - ./data/nip05:/data
+    working_dir: /app
+    command: sh -c "pip install flask pyyaml prometheus-client && python nip05_server.py"
+    environment:
+      - NIP05_CONFIG_PATH=/config/nip05.yml
+      - DATA_PATH=/data
+      - LOG_LEVEL=info
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3005/.well-known/nostr.json"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    networks:
+      - nostr-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
+
+  # Prometheus Web UI - Built-in metrics visualization (free alternative to Grafana)
+  # Access at http://localhost:9090 for basic metrics visualization and querying
+
+  # ============================================================================
+  # LIGHTNING WALLET INFRASTRUCTURE - PAUSED (TOO COMPLEX)
+  # ============================================================================
+  #
+  # Lightning wallet services have been paused due to complexity.
+  # The core Nostr relay infrastructure remains fully functional.
+  # Lightning wallet can be re-enabled later when needed.
+  #
+
+
+
+
+networks:
+  nostr-network:
+    driver: bridge
+    internal: false  # Allow internet access for image pulls, but services only bind to localhost
+
+volumes:
+  general-data:
+    driver: local
+  dm-data:
+    driver: local
+  media-data:
+    driver: local
+  social-data:
+    driver: local

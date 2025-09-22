@@ -1,0 +1,261 @@
+# Security Monitor Service Configuration
+# Vulnerability tracking and security enhancement monitoring for Nostr infrastructure
+
+# Service settings
+service:
+  name: "Nostr Security Monitor"
+  version: "1.0.0"
+  check_interval: 1800  # Check every 30 minutes
+  alert_cooldown: 3600  # Don't spam alerts (1 hour cooldown)
+
+# Monitoring sources
+sources:
+  # GitHub repositories for relay software
+  github_repos:
+    - repo: "hoytech/strfry"
+      type: "relay_software"
+      priority: "critical"
+      watch_releases: true
+      watch_security_advisories: true
+      
+    - repo: "scsibug/nostr-rs-relay"
+      type: "relay_software" 
+      priority: "critical"
+      watch_releases: true
+      watch_security_advisories: true
+      
+    - repo: "nostr-protocol/nips"
+      type: "protocol"
+      priority: "high"
+      watch_releases: true
+      watch_new_nips: true
+      
+    - repo: "nostr-protocol/nostr"
+      type: "protocol"
+      priority: "high"
+      watch_releases: true
+      
+  # CVE databases
+  cve_sources:
+    - name: "NVD"
+      url: "https://services.nvd.nist.gov/rest/json/cves/2.0"
+      keywords: ["nostr", "relay", "websocket", "sqlite"]
+      severity_threshold: "MEDIUM"
+      
+    - name: "GitHub Security Advisories"
+      url: "https://api.github.com/advisories"
+      keywords: ["nostr", "relay", "rust", "sqlite"]
+      
+  # Community sources
+  community:
+    - name: "Nostr Security Telegram"
+      type: "telegram"
+      enabled: false  # Requires API setup
+      
+    - name: "Nostr Dev Mailing List"
+      type: "rss"
+      url: "https://groups.google.com/g/nostr-dev/feed/rss_v2_0_msgs.xml"
+      keywords: ["security", "vulnerability", "patch", "fix"]
+
+# Vulnerability categories
+vulnerability_types:
+  critical:
+    - "remote_code_execution"
+    - "authentication_bypass"
+    - "privilege_escalation"
+    - "data_corruption"
+    
+  high:
+    - "denial_of_service"
+    - "information_disclosure"
+    - "sql_injection"
+    - "memory_corruption"
+    
+  medium:
+    - "cross_site_scripting"
+    - "weak_cryptography"
+    - "insecure_defaults"
+    - "rate_limit_bypass"
+    
+  low:
+    - "information_leakage"
+    - "weak_validation"
+    - "deprecated_features"
+
+# Monitoring rules
+rules:
+  # Container image updates
+  container_updates:
+    enabled: true
+    check_interval: 3600  # Check hourly
+    auto_update_security: true  # Auto-update for security patches
+    auto_update_minor: false  # Manual approval for minor updates
+    
+  # Configuration drift detection
+  config_drift:
+    enabled: true
+    baseline_configs:
+      - "/configs/cache/strfry.conf"
+      - "/configs/longform/strfry.conf"
+      - "/configs/general/config.toml"
+    hash_algorithm: "sha256"
+    
+  # Anomaly detection
+  anomalies:
+    enabled: true
+    baseline_period_days: 7
+    deviation_threshold: 2.0  # Standard deviations
+    metrics:
+      - "connection_count"
+      - "event_rate"
+      - "error_rate"
+      - "memory_usage"
+
+# Alert configuration
+alerts:
+  # Alert channels
+  channels:
+    console:
+      enabled: true
+      level: "info"
+      
+    file:
+      enabled: true
+      path: "/var/log/security-alerts.log"
+      level: "warning"
+      
+    webhook:
+      enabled: false
+      url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+      level: "critical"
+      
+  # Alert templates
+  templates:
+    vulnerability_found:
+      title: "🚨 Security Vulnerability Detected"
+      message: "Vulnerability {{.severity}} found in {{.component}}: {{.description}}"
+      
+    update_available:
+      title: "📦 Security Update Available"
+      message: "Security update available for {{.component}}: {{.version}}"
+      
+    anomaly_detected:
+      title: "⚠️ Anomaly Detected"
+      message: "Unusual activity detected in {{.service}}: {{.metric}} = {{.value}}"
+
+# Automated responses
+automation:
+  # Auto-restart on critical vulnerabilities
+  auto_restart:
+    enabled: true
+    severity_threshold: "high"
+    services: ["nostr-general", "nostr-cache", "nostr-dm"]
+    
+  # Auto-backup before updates
+  auto_backup:
+    enabled: true
+    backup_path: "/backups/security-updates"
+    retention_days: 30
+    
+  # Auto-isolation on compromise
+  auto_isolate:
+    enabled: true
+    triggers: ["remote_code_execution", "authentication_bypass"]
+    actions: ["stop_container", "block_network", "create_backup"]
+
+# Security scanning
+scanning:
+  # Port scanning
+  port_scan:
+    enabled: true
+    interval: 3600  # Hourly
+    expected_ports: [7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010, 7011, 3001]
+    
+  # Process monitoring
+  process_monitor:
+    enabled: true
+    whitelist_processes: ["strfry", "nostr-rs-relay", "nginx"]
+    alert_on_unknown: true
+    
+  # File integrity
+  file_integrity:
+    enabled: true
+    monitored_paths:
+      - "/workspace/configs"
+      - "/workspace/scripts"
+      - "/workspace/docker-compose.yml"
+    check_interval: 1800
+
+# Threat intelligence
+threat_intel:
+  # IP reputation checking
+  ip_reputation:
+    enabled: true
+    sources:
+      - "https://reputation.alienvault.com/reputation.data"
+      - "https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"
+    check_interval: 3600
+    
+  # Domain reputation
+  domain_reputation:
+    enabled: true
+    check_relay_connections: true
+    whitelist_domains: ["damus.io", "nos.lol", "snort.social"]
+
+# Compliance and reporting
+compliance:
+  # Security standards
+  standards:
+    - "NIST_CSF"  # NIST Cybersecurity Framework
+    - "ISO_27001"  # Information Security Management
+    
+  # Reporting
+  reports:
+    enabled: true
+    frequency: "weekly"
+    format: "json"
+    path: "/reports/security"
+    
+    # Report sections
+    sections:
+      - "vulnerability_summary"
+      - "update_status"
+      - "anomaly_report"
+      - "compliance_status"
+
+# Integration with health monitor
+health_integration:
+  enabled: true
+  health_monitor_url: "http://localhost:3001"
+  update_interval: 300  # 5 minutes
+  
+  # Metrics to expose
+  metrics:
+    - "vulnerabilities_found"
+    - "updates_available"
+    - "anomalies_detected"
+    - "security_score"
+
+# Emergency procedures
+emergency:
+  # Incident response
+  incident_response:
+    enabled: true
+    escalation_levels:
+      - level: 1
+        severity: ["low", "medium"]
+        actions: ["log", "alert"]
+        
+      - level: 2
+        severity: ["high"]
+        actions: ["log", "alert", "backup", "isolate"]
+        
+      - level: 3
+        severity: ["critical"]
+        actions: ["log", "alert", "backup", "isolate", "shutdown"]
+    
+  # Kill switch
+  kill_switch:
+    enabled: true
+    triggers: ["multiple_critical_vulns", "active_compromise"]
+    action: "shutdown_all_services"

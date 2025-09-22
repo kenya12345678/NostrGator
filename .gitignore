@@ -1,0 +1,141 @@
+# NostrGator - Git Ignore File
+# =============================
+
+# Environment and Secrets
+.env
+.env.local
+.env.production
+.env.staging
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Data Directories (contain databases and user data)
+data/
+backups/
+logs/
+
+# Docker Volumes and Runtime
+.docker/
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Temporary Files
+*.tmp
+*.temp
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Node.js (if any Node.js components are added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Python (if any Python components are added)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Rust (for relay binaries if compiled locally)
+target/
+Cargo.lock
+
+# Backup Files
+*.backup
+*.bak
+*.old
+
+# SSL Certificates and Keys
+*.crt
+*.csr
+*.key
+*.pem
+ssl/
+certs/
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Lightning Network Data
+lnd/
+lnbits/
+lightning/
+
+# Personal Configuration Overrides
+config.local.*
+*.personal.*
+my-*
+
+# Test Results and Coverage
+coverage/
+*.cover
+.coverage
+.pytest_cache/
+test-results/
+
+# Documentation Build Artifacts
+docs/_build/
+docs/build/
+site/
+
+# Compressed Archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# Windows Specific
+*.lnk
+*.exe
+*.msi
+
+# macOS Specific
+.AppleDouble
+.LSOverride
+Icon?
+
+# Linux Specific
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
