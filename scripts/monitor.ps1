@@ -64,9 +64,7 @@ function Get-RelayStatus {
         "Marketplace" = @{ Port = 7009; Container = "nostr-marketplace" }
         "Games" = @{ Port = 7010; Container = "nostr-games" }
         "Bridge" = @{ Port = 7011; Container = "nostr-bridge" }
-        "LND" = @{ Port = 10009; Container = "nostrgator-lnd" }
-        "LNbits" = @{ Port = 5000; Container = "nostrgator-lnbits" }
-        "Blossom" = @{ Port = 3000; Container = "nostrgator-blossom" }
+        "AlbyHub" = @{ Port = 7012; Container = "nostr-alby-hub" }
         "Backup" = @{ Port = 0; Container = "nostrgator-backup-manager" }
         "Notifications" = @{ Port = 7083; Container = "nostrgator-notifications" }
         "ContentDiscovery" = @{ Port = 7080; Container = "nostr-content-discovery" }

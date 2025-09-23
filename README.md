@@ -7,6 +7,7 @@
 - **🏃‍♂️ Ultra-Fast**: Sub-5ms response time vs 100-500ms for public relays
 - **🔒 Private & Secure**: Localhost-only, your data never leaves your machine
 - **🌐 Complete Coverage**: 11 specialized relays covering every Nostr use case
+- **⚡ Lightning Wallet**: Self-hosted Alby Hub with Nostr Wallet Connect (NWC)
 - **� Professional File Server**: NostrCheck-server with full NIP-96 & Blossom support
 - **�🔄 Hybrid Sovereignty**: Local control with global reach via event mirroring
 - **🆔 NIP-05 Identity**: DNS-based identity verification system
@@ -17,7 +18,7 @@
 - **📦 Production Ready**: Uses proven Docker images from the Nostr ecosystem
 - **📱 Client Compatible**: Works with Primal, Damus, Amethyst, iris.to, etc.
 
-## 🏗️ Complete Architecture - 19 Services
+## 🏗️ Complete Architecture - 20 Services
 
 ### **Core Nostr Relays (11 Services)**
 - **General Relay** (Port 7001): All event types, primary hub
@@ -32,7 +33,7 @@
 - **Games Relay** (Port 7010): Interactive content, gaming
 - **Bridge Relay** (Port 7011): Cross-protocol integration
 
-### **Advanced Services (8 Services)**
+### **Advanced Services (9 Services)**
 - **Event Mirroring**: Hybrid sovereignty with public relay backup
 - **NIP-05 Service**: DNS identity verification (admin@localhost)
 - **Federation Engine**: Peer discovery and trust scoring
@@ -40,6 +41,7 @@
 - **Content Discovery**: Search and content recommendation
 - **Security Monitor**: Spam filtering and rate limiting
 - **Health Monitor**: System health and performance monitoring
+- **Alby Hub**: Self-hosted Lightning wallet with Nostr Wallet Connect (NWC)
 - **Watchtower**: Automated container updates
 
 ## 🚀 Quick Start
@@ -98,6 +100,25 @@ ws://localhost:7004    # Social engagement
 - `ws://localhost:7006` (Files - HTTP only, not WebSocket)
 - `ws://localhost:7081` (Security Monitor - internal only)
 
+### 4. Setup Lightning Wallet (Optional)
+
+**🔧 Initial Wallet Setup:**
+1. **Access Alby Hub**: Open `http://localhost:7012`
+2. **Create Wallet**: Set a strong password for your wallet
+3. **Backup Seed**: Save your seed phrase securely (encrypted locally)
+4. **Configure Lightning**: Choose embedded LDK or connect external node
+
+**⚡ Enable Nostr Wallet Connect:**
+1. **Generate NWC String**: In Alby Hub UI, create a new NWC connection
+2. **Add to Nostr Client**: Paste the NWC string in your client's wallet settings
+3. **Test Payment**: Try sending/receiving a small amount to verify
+
+**🔗 Supported Clients with NWC:**
+- **Damus** (iOS): Settings → Wallet → Nostr Wallet Connect
+- **Amethyst** (Android): Settings → Zaps → Wallet Connect
+- **Primal** (Web/Mobile): Settings → Lightning → Connect Wallet
+- **iris.to** (Web): Settings → Lightning Wallet
+
 ## 📊 Management Interfaces
 
 ### **Monitoring & Metrics**
@@ -113,6 +134,12 @@ ws://localhost:7004    # Social engagement
 - **File Downloads**: `http://localhost:7006/api/v1/files/filename`
 - **NIP-96 Discovery**: `http://localhost:7006/.well-known/nostr/nip96`
 - **Public Gallery**: `http://localhost:7006/gallery` (uploaded files showcase)
+
+### **Lightning Wallet (Alby Hub)**
+- **Web Interface**: `http://localhost:7012` (wallet management)
+- **API Info**: `http://localhost:7012/api/info` (wallet status)
+- **Nostr Wallet Connect**: Generate NWC connection strings in the UI
+- **Lightning Address**: Configure your Lightning address for receiving payments
 
 ## 🛠️ Management Commands
 
@@ -226,6 +253,7 @@ NostrGator is designed to **complement** your existing Nostr usage:
 ## 📚 Documentation
 - **🚀 [Quick Start](QUICK-START.md)**: Get running in 5 minutes
 - **📱 [Client Setup](docs/client-setup.md)**: Configure popular Nostr clients
+- **⚡ [Lightning Wallet Setup](docs/lightning-wallet-setup.md)**: Alby Hub and NWC configuration
 - **🔧 [Native Installation](docs/native-installation.md)**: Run without Docker
 - **🆘 [Troubleshooting](docs/troubleshooting.md)**: Common issues and solutions
 - **🛡️ [Security](docs/security.md)**: Security best practices

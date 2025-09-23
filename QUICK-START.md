@@ -1,7 +1,7 @@
 # 🚀 NostrGator - Quick Start Guide
 
 ## What You Have
-A complete, professional Nostr infrastructure with **19 services** including specialized relays, professional file hosting, and enterprise monitoring - all running locally with **proven open source technology**.
+A complete, professional Nostr infrastructure with **20 services** including specialized relays, Lightning wallet, professional file hosting, and enterprise monitoring - all running locally with **proven open source technology**.
 
 ## Your Relay URLs (Ready to Use)
 - **General**: `ws://localhost:7001` (Core notes and feeds)
@@ -28,7 +28,7 @@ A complete, professional Nostr infrastructure with **19 services** including spe
 # Navigate to your NostrGator directory
 cd "C:\Users\gerry\Documents\augment-projects\NOSTR RELAY SUITE"
 
-# Start all 19 services
+# Start all 20 services
 docker compose up -d
 
 # Verify everything is running
@@ -101,7 +101,7 @@ curl http://localhost:7001
 - **File Server**: `quentintaranpino/nostrcheck-server` (professional NIP-96 & Blossom)
 - **Database**: SQLite with WAL mode (fast, reliable)
 - **Monitoring**: Prometheus metrics and health monitoring
-- **Orchestration**: Docker Compose with 19 services
+- **Orchestration**: Docker Compose with 20 services
 - **Security**: Localhost-only, pubkey whitelisting, rate limiting
 
 ## 📊 System Status

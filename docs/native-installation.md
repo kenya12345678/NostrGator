@@ -408,6 +408,67 @@ chmod +x ~/nostrgator/db-maintenance.sh
 echo "0 2 * * * $HOME/nostrgator/db-maintenance.sh" | crontab -
 ```
 
+## ⚡ Lightning Wallet Setup (Alby Hub)
+
+### **Download and Install Alby Hub**
+
+**Linux/macOS:**
+```bash
+# Download latest Alby Hub release
+curl -L https://github.com/getAlby/hub/releases/latest/download/alby-hub-linux-amd64.tar.gz -o alby-hub.tar.gz
+tar -xzf alby-hub.tar.gz
+sudo mv alby-hub /usr/local/bin/
+
+# Create data directory
+mkdir -p ~/nostrgator/data/alby-hub
+
+# Create systemd service
+sudo tee /etc/systemd/system/alby-hub.service > /dev/null <<EOF
+[Unit]
+Description=Alby Hub Lightning Wallet
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$HOME/nostrgator/data/alby-hub
+ExecStart=/usr/local/bin/alby-hub
+Environment=PORT=7012
+Environment=WORK_DIR=$HOME/nostrgator/data/alby-hub
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+sudo systemctl enable alby-hub
+sudo systemctl start alby-hub
+```
+
+**Windows:**
+```powershell
+# Download from GitHub releases page
+# https://github.com/getAlby/hub/releases/latest
+
+# Extract to C:\nostrgator\alby-hub\
+# Create data directory
+New-Item -ItemType Directory -Path "C:\nostrgator\data\alby-hub" -Force
+
+# Install as Windows service using NSSM
+nssm install AlbyHub "C:\nostrgator\alby-hub\alby-hub.exe"
+nssm set AlbyHub AppDirectory "C:\nostrgator\data\alby-hub"
+nssm set AlbyHub AppEnvironmentExtra "PORT=7012" "WORK_DIR=C:\nostrgator\data\alby-hub"
+nssm start AlbyHub
+```
+
+### **Configure Alby Hub**
+1. **Access Web Interface**: Open `http://localhost:7012`
+2. **Create Wallet**: Set a strong password
+3. **Backup Seed**: Save your seed phrase securely
+4. **Configure Lightning**: Choose embedded LDK or external node
+5. **Generate NWC**: Create Nostr Wallet Connect strings for clients
+
 ## 🎯 Next Steps
 
 1. **Start with core relays** (general, dm, media, social, cache)

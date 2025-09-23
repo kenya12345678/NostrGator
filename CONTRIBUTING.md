@@ -5,7 +5,7 @@
 **NostrGator** is a complete sovereign Nostr infrastructure solution designed to provide 100% protocol coverage with complete financial sovereignty. Our mission is to empower individuals and organizations with enterprise-grade Nostr infrastructure that they can own, control, and customize.
 
 ### **What NostrGator Provides**
-- **19 Specialized Services**: 11 Nostr relays + 8 supporting services
+- **20 Specialized Services**: 11 Nostr relays + 9 supporting services
 - **Professional File Hosting**: NIP-96 & Blossom protocol support via NostrCheck-server
 - **Enterprise Monitoring**: Prometheus metrics and health monitoring
 - **Complete Sovereignty**: Local control with global reach via event mirroring

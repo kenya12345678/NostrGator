@@ -150,14 +150,19 @@ function Show-ServiceStatus {
         Write-Host "DM:       ws://localhost:7002" -ForegroundColor White
         Write-Host "Media:    ws://localhost:7003" -ForegroundColor White
         Write-Host "Social:   ws://localhost:7004" -ForegroundColor White
-        
+
+        Write-Host "`n⚡ Lightning Wallet:" -ForegroundColor Cyan
+        Write-Host "Alby Hub: http://localhost:7012" -ForegroundColor White
+        Write-Host "Setup your Lightning wallet for Nostr Wallet Connect" -ForegroundColor Gray
+
         Write-Host "`n🔑 Your Public Key (for client configuration):" -ForegroundColor Cyan
         Write-Host "npub1qs9t3tf2kfz872ns9yp42044dqs2v7v68mwy5mfczmsvcs075luqr7226z" -ForegroundColor White
-        
+
         Write-Host "`n📝 Next Steps:" -ForegroundColor Cyan
         Write-Host "1. Run .\scripts\verify.ps1 to test the relays" -ForegroundColor White
         Write-Host "2. Configure your Nostr clients with the relay URLs above" -ForegroundColor White
-        Write-Host "3. See docs\client-setup.md for detailed client configuration" -ForegroundColor White
+        Write-Host "3. Setup Lightning wallet at http://localhost:7012" -ForegroundColor White
+        Write-Host "4. See docs\client-setup.md for detailed client configuration" -ForegroundColor White
     }
     catch {
         Write-Host "❌ Failed to get service status: $_" -ForegroundColor Red
