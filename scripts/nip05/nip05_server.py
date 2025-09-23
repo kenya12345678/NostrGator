@@ -130,8 +130,19 @@ class NIP05Service:
             
             verification = self.verify_nip05(identifier)
             self.nip05_requests.labels(type='verification').inc()
-            
-            return jsonify(verification)
+
+            # Sanitize response to prevent information exposure
+            safe_response = {
+                'verified': verification.get('verified', False),
+                'identifier': verification.get('identifier', ''),
+                'verified_at': verification.get('verified_at', '')
+            }
+            # Only include pubkey and relays if verification succeeded
+            if verification.get('verified'):
+                safe_response['pubkey'] = verification.get('pubkey', '')
+                safe_response['relays'] = verification.get('relays', [])
+
+            return jsonify(safe_response)
             
         except ValueError as error:
             # Log sanitized error details for debugging
@@ -147,7 +158,19 @@ class NIP05Service:
     def handle_verification_get(self, identifier):
         try:
             verification = self.verify_nip05(identifier)
-            return jsonify(verification)
+
+            # Sanitize response to prevent information exposure
+            safe_response = {
+                'verified': verification.get('verified', False),
+                'identifier': verification.get('identifier', ''),
+                'verified_at': verification.get('verified_at', '')
+            }
+            # Only include pubkey and relays if verification succeeded
+            if verification.get('verified'):
+                safe_response['pubkey'] = verification.get('pubkey', '')
+                safe_response['relays'] = verification.get('relays', [])
+
+            return jsonify(safe_response)
         except ValueError as error:
             # Log sanitized error details for debugging
             logger.warning(f'Invalid verification request: validation error')
