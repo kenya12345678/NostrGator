@@ -515,13 +515,44 @@ services:
   # Access at http://localhost:9090 for basic metrics visualization and querying
 
   # ============================================================================
-  # LIGHTNING WALLET INFRASTRUCTURE - PAUSED (TOO COMPLEX)
+  # LIGHTNING WALLET INFRASTRUCTURE - ALBY HUB (SELF-HOSTED)
   # ============================================================================
-  #
-  # Lightning wallet services have been paused due to complexity.
-  # The core Nostr relay infrastructure remains fully functional.
-  # Lightning wallet can be re-enabled later when needed.
-  #
+
+  # Alby Hub - Self-hosted Lightning wallet with Nostr Wallet Connect
+  alby-hub:
+    image: ghcr.io/getalby/hub:latest
+    container_name: nostr-alby-hub
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7012:8080"  # Web UI
+    volumes:
+      - ./data/alby-hub:/data
+    environment:
+      - WORK_DIR=/data
+      - PORT=8080
+      - LOG_LEVEL=info
+      # Connect to local NostrGator relays for NWC
+      - RELAY=ws://nostr-general:8080
+      - BACKUP_RELAYS=ws://nostr-social:8080,ws://nostr-dm:8080
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - nostr-network
+    depends_on:
+      - general-relay
+      - social-relay
+      - dm-relay
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nostr-relay-suite"
 
 
 

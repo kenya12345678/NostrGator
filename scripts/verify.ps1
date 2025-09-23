@@ -24,7 +24,7 @@ $testResults = @{
 function Test-ContainerHealth {
     Write-Host "`n📦 Testing Container Health..." -ForegroundColor Yellow
     
-    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social", "nostr-cache", "nostr-files", "nostr-longform", "nostr-live", "nostr-marketplace", "nostr-games", "nostr-bridge", "nostr-watchtower", "nostr-health-monitor", "nostr-content-discovery", "nostr-security-monitor", "nostr-tor-proxy", "nostr-supernode-federation", "nostr-event-mirror", "nostr-nip05")
+    $containers = @("nostr-general", "nostr-dm", "nostr-media", "nostr-social", "nostr-cache", "nostr-files", "nostr-longform", "nostr-live", "nostr-marketplace", "nostr-games", "nostr-bridge", "nostr-watchtower", "nostr-health-monitor", "nostr-content-discovery", "nostr-security-monitor", "nostr-tor-proxy", "nostr-supernode-federation", "nostr-event-mirror", "nostr-nip05", "nostr-alby-hub")
     
     foreach ($container in $containers) {
         try {
@@ -84,6 +84,7 @@ function Test-PortConnectivity {
         "TorProxy" = 9050
         "ContentDiscovery" = 7080
         "SecurityMonitor" = 7081
+        "AlbyHub" = 7012
     }
     
     foreach ($relay in $ports.Keys) {
@@ -126,6 +127,7 @@ function Test-RelayResponses {
         "NIP05WellKnown" = "http://localhost:3005/.well-known/nostr.json"
         "ContentDiscoveryHealth" = "http://localhost:7080/health"
         "SecurityMonitorHealth" = "http://localhost:7081/health"
+        "AlbyHubInfo" = "http://localhost:7012/api/info"
     }
     
     foreach ($relay in $relays.Keys) {
